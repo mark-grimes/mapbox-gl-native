@@ -1,5 +1,9 @@
-add_library(geometry.hpp INTERFACE)
+if(TARGET mbgl-vendor-geometry.hpp)
+    return()
+endif()
 
-target_include_directories(geometry.hpp SYSTEM INTERFACE
-    ${CMAKE_SOURCE_DIR}/vendor/geometry.hpp/include
+add_library(mbgl-vendor-geometry.hpp INTERFACE)
+
+target_include_directories(mbgl-vendor-geometry.hpp SYSTEM INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}/geometry.hpp/include
 )

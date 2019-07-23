@@ -1,5 +1,9 @@
-add_library(filesystem INTERFACE)
+if(TARGET mbgl-vendor-filesystem)
+    return()
+endif()
 
-target_include_directories(filesystem SYSTEM INTERFACE
+add_library(mbgl-vendor-filesystem INTERFACE)
+
+target_include_directories(mbgl-vendor-filesystem SYSTEM INTERFACE
     ${CMAKE_SOURCE_DIR}/vendor/filesystem/include
 )

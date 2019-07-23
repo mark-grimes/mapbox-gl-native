@@ -1,5 +1,9 @@
-add_library(args INTERFACE)
+if(TARGET mbgl-vendor-args)
+    return()
+endif()
 
-target_include_directories(args SYSTEM INTERFACE
-    ${CMAKE_SOURCE_DIR}/vendor/args
+add_library(mbgl-vendor-args INTERFACE)
+
+target_include_directories(mbgl-vendor-args SYSTEM INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}/args
 )

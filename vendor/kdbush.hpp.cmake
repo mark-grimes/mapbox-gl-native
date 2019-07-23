@@ -1,5 +1,9 @@
-add_library(kdbush.hpp INTERFACE)
+if(TARGET mbgl-vendor-kdbush.hpp)
+    return()
+endif()
 
-target_include_directories(kdbush.hpp SYSTEM INTERFACE
-    ${CMAKE_SOURCE_DIR}/vendor/kdbush.hpp/include
+add_library(mbgl-vendor-kdbush.hpp INTERFACE)
+
+target_include_directories(mbgl-vendor-kdbush.hpp SYSTEM INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}/kdbush.hpp/include
 )

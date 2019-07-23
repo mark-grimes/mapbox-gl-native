@@ -1,5 +1,9 @@
-add_library(optional INTERFACE)
+if(TARGET mbgl-vendor-optional)
+    return()
+endif()
 
-target_include_directories(optional SYSTEM INTERFACE
-    ${CMAKE_SOURCE_DIR}/vendor/optional
+add_library(mbgl-vendor-optional INTERFACE)
+
+target_include_directories(mbgl-vendor-optional SYSTEM INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}/optional
 )
