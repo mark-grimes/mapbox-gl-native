@@ -38,3 +38,5 @@ target_compile_options(mbgl-vendor-icu PRIVATE
 target_include_directories(mbgl-vendor-icu SYSTEM PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/icu/include
 )
+
+set_property(TARGET mbgl-vendor-icu PROPERTY FOLDER Core)

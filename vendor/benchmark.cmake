@@ -27,3 +27,5 @@ target_compile_definitions(mbgl-vendor-benchmark PRIVATE
 target_include_directories(mbgl-vendor-benchmark SYSTEM PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/benchmark/include
 )
+
+set_property(TARGET mbgl-vendor-benchmark PROPERTY FOLDER Core)

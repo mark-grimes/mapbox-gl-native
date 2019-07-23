@@ -15,3 +15,5 @@ add_library(mbgl-vendor-gtest STATIC EXCLUDE_FROM_ALL
 target_include_directories(mbgl-vendor-gtest PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/gtest/include
 )
+
+set_property(TARGET mbgl-vendor-gtest PROPERTY FOLDER Core)
