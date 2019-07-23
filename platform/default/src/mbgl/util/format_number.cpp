@@ -23,7 +23,7 @@ std::string formatNumber(double number, const std::string& localeId, const std::
                 .toString();
     } else {
         ustr = icu::number::NumberFormatter::with()
-                .precision(icu::number::Precision::minMaxFraction(minFractionDigits, maxFractionDigits))
+                //.precision(icu_60::number::Precision::minMaxFraction(minFractionDigits, maxFractionDigits))
                 .locale(locale)
                 .formatDouble(number, status)
                 .toString();
