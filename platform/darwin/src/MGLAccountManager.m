@@ -102,7 +102,8 @@ static NSString * const MGLAccountManagerExternalMethodName = @"skuToken";
         return (NSString *)[mbx valueForKeyPath:MGLAccountManagerExternalMethodName];
     }
     
-    return MBXSKUToken.skuToken;
+    //return MBXSKUToken.skuToken;
+    return @"";
 }
 
 #endif
