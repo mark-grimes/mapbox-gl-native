@@ -1,0 +1,130 @@
+version: 2.1
+
+workflows:
+  version: 2
+  default:
+    jobs:
+      - build-template-linux:
+          name: Linux Android armeabi-v7a Release
+          image: mbgl/android-ndk-r20:7b7c4b42cf
+          config_params: "-DCMAKE_TOOLCHAIN_FILE=/android/sdk/ndk-bundle/build/cmake/android.toolchain.cmake -DANDROID_ABI=armeabi-v7a"
+      - build-template-linux:
+          name: Linux Android aarch64 Release
+          image: mbgl/android-ndk-r20:7b7c4b42cf
+          config_params: "-DCMAKE_TOOLCHAIN_FILE=/android/sdk/ndk-bundle/build/cmake/android.toolchain.cmake -DANDROID_ABI=aarch64"
+      - build-template-linux:
+          name: Linux Android x86 Release
+          image: mbgl/android-ndk-r20:7b7c4b42cf
+          config_params: "-DCMAKE_TOOLCHAIN_FILE=/android/sdk/ndk-bundle/build/cmake/android.toolchain.cmake -DANDROID_ABI=x86"
+      - build-template-linux:
+          name: Linux GCC8 Release
+          image: ubuntu:disco
+      - build-template-linux:
+          name: Linux Clang7 Release
+          image: ubuntu:disco
+      - build-template-linux:
+          name: Linux Clang7 Debug
+          image: ubuntu:disco
+          config_params: "-DCMAKE_BUILD_TYPE=Debug"
+      - build-template-linux:
+          name: Qt5 Linux GCC5 Release
+          image: ubuntu:disco
+          config_params: "-DMBGL_WITH_QT=ON"
+      - build-template-macos:
+          name: Qt5 macOS 10.1.0 Release
+          xcode: "10.1.0"
+          config_params: "-DMBGL_WITH_QT=ON"
+      - build-template-macos:
+          name: macOS 10.2.1 Release
+          xcode: "10.2.1"
+
+commands:
+  prepare:
+    description: Prepare
+    steps:
+      - run: |
+          git submodule update --init --recursive
+  config:
+    description: Configure
+    parameters:
+      config_params:
+        type: string
+    steps:
+      - run: |
+          mkdir build && cd build
+          cmake .. << parameters.config_params >>
+  build:
+    description: Build
+    parameters:
+      build_params:
+        type: string
+    steps:
+      - run: |
+          cd build
+          cmake --build . -j 4 << parameters.build_params >>
+  test:
+    description: Test
+    steps:
+      - run: |
+          cd build
+          cmake --build . --target test
+
+jobs:
+  build-template-linux:
+    parameters:
+      image:
+        type: string
+      config_params:
+        type: string
+        default: ""
+      build_params:
+        type: string
+        default: ""
+    docker:
+      - image: << parameters.image >>
+    steps:
+      - checkout
+      - prepare
+      - run:
+          name: Install deps
+          command: |
+            apt update
+            apt install -y cmake libuv1-dev libicu-dev libjpeg-turbo8-dev libpng-dev \
+              libcurl4-openssl-dev mesa-common-dev
+      - config:
+          config_params: << parameters.config_params >>
+      - build:
+          build_params: << parameters.build_params >>
+      - test
+  build-template-macos:
+    parameters:
+      xcode:
+        type: string
+      config_params:
+        type: string
+        default: ""
+      build_params:
+        type: string
+        default: ""
+    macos:
+      xcode: << parameters.xcode >>
+    environment:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+    steps:
+      - checkout
+      - prepare
+      - run:
+          name: Install deps
+          command: |
+            brew install cmake ccache pkgconfig glfw qt
+            brew link qt --force
+            export HOMEBREW_QT5_CELLAR=$(brew --cellar qt)
+            export HOMEBREW_QT5_VERSION=$(brew list --versions qt |rev |cut -d' ' -f1 |rev)
+            sudo ln -s $HOMEBREW_QT5_CELLAR/$HOMEBREW_QT5_VERSION/mkspecs /usr/local/mkspecs
+            sudo ln -s $HOMEBREW_QT5_CELLAR/$HOMEBREW_QT5_VERSION/plugins /usr/local/plugins
+      - config:
+          config_params: << parameters.config_params >>
+      - build:
+          build_params: << parameters.build_params >>
+      - test
