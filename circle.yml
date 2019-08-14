@@ -6,30 +6,23 @@ workflows:
     jobs:
       - build-template-linux:
           name: Linux Android armeabi-v7a Release
-          image: mbgl/android-ndk-r20:7b7c4b42cf
-          config_params: "-DCMAKE_TOOLCHAIN_FILE=/android/sdk/ndk-bundle/build/cmake/android.toolchain.cmake -DANDROID_ABI=armeabi-v7a"
+          config_params: "-G Ninja -DCMAKE_TOOLCHAIN_FILE=/opt/android/sdk/ndk-bundle/build/cmake/android.toolchain.cmake -DANDROID_ABI=armeabi-v7a"
       - build-template-linux:
           name: Linux Android aarch64 Release
-          image: mbgl/android-ndk-r20:7b7c4b42cf
-          config_params: "-DCMAKE_TOOLCHAIN_FILE=/android/sdk/ndk-bundle/build/cmake/android.toolchain.cmake -DANDROID_ABI=aarch64"
+          config_params: "-G Ninja -DCMAKE_TOOLCHAIN_FILE=/opt/android/sdk/ndk-bundle/build/cmake/android.toolchain.cmake -DANDROID_ABI=aarch64"
       - build-template-linux:
           name: Linux Android x86 Release
-          image: mbgl/android-ndk-r20:7b7c4b42cf
-          config_params: "-DCMAKE_TOOLCHAIN_FILE=/android/sdk/ndk-bundle/build/cmake/android.toolchain.cmake -DANDROID_ABI=x86"
+          config_params: "-G Ninja -DCMAKE_TOOLCHAIN_FILE=/opt/android/sdk/ndk-bundle/build/cmake/android.toolchain.cmake -DANDROID_ABI=x86"
       - build-template-linux:
           name: Linux GCC8 Release
-          image: ubuntu:disco
       - build-template-linux:
           name: Linux Clang7 Release
-          image: ubuntu:disco
       - build-template-linux:
           name: Linux Clang7 Debug
-          image: ubuntu:disco
-          config_params: "-DCMAKE_BUILD_TYPE=Debug"
+          config_params: "-G Ninja -DCMAKE_BUILD_TYPE=Debug"
       - build-template-linux:
           name: Qt5 Linux GCC5 Release
-          image: ubuntu:disco
-          config_params: "-DMBGL_WITH_QT=ON"
+          config_params: "-G Ninja -DMBGL_WITH_QT=ON"
       - build-template-macos:
           name: Qt5 macOS 10.1.0 Release
           xcode: "10.1.0"
@@ -67,30 +60,22 @@ commands:
     steps:
       - run: |
           cd build
-          cmake --build . --target test
+          xvfb-run cmake --build . --target test
 
 jobs:
   build-template-linux:
     parameters:
-      image:
-        type: string
       config_params:
         type: string
-        default: ""
+        default: "-G Ninja"
       build_params:
         type: string
         default: ""
     docker:
-      - image: << parameters.image >>
+      - image: tmpsantos/mbgl_ci:1.0
     steps:
       - checkout
       - prepare
-      - run:
-          name: Install deps
-          command: |
-            apt update
-            apt install -y cmake libuv1-dev libicu-dev libjpeg-turbo8-dev libpng-dev \
-              libcurl4-openssl-dev mesa-common-dev
       - config:
           config_params: << parameters.config_params >>
       - build:
