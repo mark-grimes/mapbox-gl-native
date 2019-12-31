@@ -58,6 +58,63 @@ void QMapboxGLMapRenderer::updateParameters(std::shared_ptr<mbgl::UpdateParamete
     m_updateParameters = std::move(newParameters);
 }
 
+std::vector<QMapbox::Feature> QMapboxGLMapRenderer::queryRenderedFeatures(const QPointF& point) const
+{
+    const mbgl::ScreenCoordinate mapboxPoint( point.x(), point.y() );
+    const auto mapboxFeatures=m_renderer->queryRenderedFeatures( mapboxPoint );
+
+    std::vector<QMapbox::Feature> result;
+    for( const auto& mapboxFeature : mapboxFeatures )
+    {
+        QMapbox::Feature qtFeature;
+        if( mapboxFeature.id.is<mapbox::feature::null_value_t>() ) qtFeature.id=QVariant();
+        else if( mapboxFeature.id.is<uint64_t>() ) qtFeature.id=QVariant::fromValue( mapboxFeature.id.get<uint64_t>() );
+        else if( mapboxFeature.id.is<int64_t>() ) qtFeature.id=QVariant::fromValue( mapboxFeature.id.get<int64_t>() );
+        else if( mapboxFeature.id.is<double>() ) qtFeature.id=QVariant::fromValue( mapboxFeature.id.get<double>() );
+        else if( mapboxFeature.id.is<std::string>() )
+        {
+            qtFeature.id=QVariant::fromValue<QString>( mapboxFeature.id.get<std::string>().c_str() );
+            std::string value=mapboxFeature.id.get<std::string>();
+        }
+
+        if( mapboxFeature.geometry.is<mapbox::geometry::point<double>>() )
+        {
+            qtFeature.type=QMapbox::Feature::Type::PointType;
+            // TODO - convert mapboxFeature.geometry
+        }
+        else if( mapboxFeature.geometry.is<mapbox::geometry::line_string<double>>() )
+        {
+            qtFeature.type=QMapbox::Feature::Type::LineStringType;
+            // TODO - convert mapboxFeature.geometry
+        }
+        else if( mapboxFeature.geometry.is<mapbox::geometry::polygon<double>>() )
+        {
+            qtFeature.type=QMapbox::Feature::Type::PolygonType;
+            // TODO - convert mapboxFeature.geometry
+        }
+
+        for( const auto& nameValuePair : mapboxFeature.properties )
+        {
+            // using value_base = mapbox::util::variant<null_value_t, bool, uint64_t, int64_t, double, std::string,
+            //                                          mapbox::util::recursive_wrapper<std::vector<value>>,
+            //                                          mapbox::util::recursive_wrapper<std::unordered_map<std::string, value>>>;
+
+            if( nameValuePair.second.is<mapbox::feature::null_value_t>() ) qtFeature.properties[nameValuePair.first.c_str()]=QVariant();
+            else if( nameValuePair.second.is<bool>() ) qtFeature.properties[nameValuePair.first.c_str()]=nameValuePair.second.get<bool>();
+            else if( nameValuePair.second.is<uint64_t>() ) qtFeature.properties[nameValuePair.first.c_str()]=nameValuePair.second.get<uint64_t>();
+            else if( nameValuePair.second.is<int64_t>() ) qtFeature.properties[nameValuePair.first.c_str()]=nameValuePair.second.get<int64_t>();
+            else if( nameValuePair.second.is<double>() ) qtFeature.properties[nameValuePair.first.c_str()]=nameValuePair.second.get<double>();
+            else if( nameValuePair.second.is<std::string>() ) qtFeature.properties[nameValuePair.first.c_str()]=QVariant::fromValue<QString>( nameValuePair.second.get<std::string>().c_str() );
+            // TODO - add conversions for vectors and maps. For now just add an empty entry so at least we get the name
+            else qtFeature.properties[nameValuePair.first.c_str()]=QVariant();
+        }
+
+        result.push_back( std::move(qtFeature) );
+    }
+
+    return result;
+}
+
 void QMapboxGLMapRenderer::updateFramebuffer(quint32 fbo, const mbgl::Size &size)
 {
     MBGL_VERIFY_THREAD(tid);

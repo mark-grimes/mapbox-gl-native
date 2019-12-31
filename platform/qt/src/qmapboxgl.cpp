@@ -1650,6 +1650,11 @@ void QMapboxGL::setFramebufferObject(quint32 fbo, const QSize& size)
     d_ptr->setFramebufferObject(fbo, size);
 }
 
+std::vector<QMapbox::Feature> QMapboxGL::queryRenderedFeatures(const QPointF& point) const
+{
+    return d_ptr->queryRenderedFeatures(point);
+}
+
 /*!
     Informs the map that the network connection has been established, causing
     all network requests that previously timed out to be retried immediately.
@@ -1839,6 +1844,17 @@ void QMapboxGLPrivate::setFramebufferObject(quint32 fbo, const QSize& size)
     }
 
     m_mapRenderer->updateFramebuffer(fbo, sanitizedSize(size));
+}
+
+std::vector<QMapbox::Feature> QMapboxGLPrivate::queryRenderedFeatures(const QPointF& point)
+{
+    std::lock_guard<std::recursive_mutex> lock(m_mapRendererMutex);
+
+    if (!m_mapRenderer) {
+        createRenderer();
+    }
+
+    return m_mapRenderer->queryRenderedFeatures(point);
 }
 
 void QMapboxGLPrivate::requestRendering()

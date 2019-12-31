@@ -34,6 +34,7 @@ public:
     // Thread-safe, called by the Frontend
     void updateParameters(std::shared_ptr<mbgl::UpdateParameters>);
 
+    std::vector<QMapbox::Feature> queryRenderedFeatures(const QPointF& point) const;
 signals:
     void needsRendering();
 
