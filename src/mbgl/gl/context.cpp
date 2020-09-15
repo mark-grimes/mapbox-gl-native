@@ -14,6 +14,7 @@
 #include <mbgl/util/logging.hpp>
 
 #include <cstring>
+#include <iterator>
 
 namespace mbgl {
 namespace gl {
